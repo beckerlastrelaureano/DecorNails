@@ -1,0 +1,15 @@
+{
+  "name": "Decor Nails",
+  "short_name": "Decor Nails",
+  "description": "Reservá tu turno para uñas online",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#E8E0D4",
+  "theme_color": "#E8E0D4",
+  "icons": [
+    { "src": "assets/iconos/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/iconos/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/iconos/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/iconos/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

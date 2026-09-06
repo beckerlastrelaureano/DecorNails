@@ -1,0 +1,437 @@
+/* =========================================================================
+   Decor Nails — estilos
+   Paleta tomada del logo: beige cálido de fondo, carbón para texto y
+   acentos. Tipografía: Cormorant Garamond (títulos, con el mismo aire
+   elegante del logo) + Manrope (todo lo funcional: horarios, precios,
+   botones, formularios).
+   ========================================================================= */
+
+:root {
+  --color-acento: #242220;
+  --color-acento-claro: #E8E0D4;
+  --color-acento-rgb: 36, 34, 32;
+
+  --beige: #E8E0D4;
+  --beige-suave: #F3EEE6;
+  --carbon: #242220;
+  --carbon-suave: #55504A;
+  --linea: #D9CFC0;
+  --blanco: #FFFDFB;
+  --verde-whatsapp: #25D366;
+  --rojo-aviso: #A8402F;
+
+  --radio: 4px;
+  --sombra: 0 2px 10px rgba(36, 34, 32, 0.08);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--beige-suave);
+  color: var(--carbon);
+  font-family: 'Manrope', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .fuente-display {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+
+button { font-family: inherit; }
+
+a { color: var(--carbon); }
+
+:focus-visible {
+  outline: 2px solid var(--carbon);
+  outline-offset: 2px;
+}
+
+.oculto { display: none !important; }
+
+/* ---------------------------------------------------------------------
+   Encabezado
+   --------------------------------------------------------------------- */
+.encabezado {
+  background: var(--beige);
+  padding: 22px 20px 26px;
+  text-align: center;
+  border-bottom: 1px solid var(--linea);
+}
+
+.encabezado img.marca-logo {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 8px;
+}
+
+.encabezado h1 {
+  font-size: 30px;
+  font-style: italic;
+}
+
+.encabezado p.responsable {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--carbon-suave);
+}
+
+/* ---------------------------------------------------------------------
+   Contenedor general
+   --------------------------------------------------------------------- */
+.contenedor {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px 18px 60px;
+}
+
+/* ---------------------------------------------------------------------
+   Selector de fecha
+   --------------------------------------------------------------------- */
+.selector-fecha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.selector-fecha button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--linea);
+  background: var(--blanco);
+  border-radius: var(--radio);
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--carbon);
+}
+
+.selector-fecha button:hover { background: var(--beige-suave); }
+
+.selector-fecha input[type="date"] {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  font-family: inherit;
+  font-size: 15px;
+  background: var(--blanco);
+  color: var(--carbon);
+}
+
+.dia-titulo {
+  margin: 14px 0 18px;
+  font-size: 22px;
+  color: var(--carbon);
+}
+
+.dia-cerrado {
+  padding: 30px 16px;
+  text-align: center;
+  color: var(--carbon-suave);
+  border: 1px dashed var(--linea);
+  border-radius: var(--radio);
+}
+
+/* ---------------------------------------------------------------------
+   Franjas horarias
+   --------------------------------------------------------------------- */
+.lista-franjas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.franja {
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  background: var(--blanco);
+  overflow: hidden;
+}
+
+.franja-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--carbon);
+}
+
+.franja-cabecera .hora {
+  font-weight: 700;
+  min-width: 92px;
+}
+
+.franja-cabecera .estado {
+  font-size: 13px;
+  color: var(--carbon-suave);
+}
+
+.franja.disponible .franja-cabecera:hover { background: var(--beige-suave); }
+
+.franja.ocupada .franja-cabecera {
+  cursor: default;
+  color: var(--carbon-suave);
+}
+
+.franja.ocupada { background: var(--beige-suave); }
+
+.franja.bloqueada .franja-cabecera {
+  cursor: default;
+  color: #B0A99C;
+}
+
+.franja.bloqueada { background: repeating-linear-gradient(45deg, var(--blanco), var(--blanco) 8px, var(--beige-suave) 8px, var(--beige-suave) 16px); }
+
+.franja.seleccionada .franja-cabecera { background: var(--carbon); color: var(--blanco); }
+.franja.seleccionada .franja-cabecera .estado { color: var(--beige); }
+
+/* Panel de servicio, se despliega dentro de la franja tocada */
+.panel-servicio {
+  padding: 4px 16px 18px;
+  border-top: 1px solid var(--linea);
+}
+
+.lista-servicios {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.opcion-servicio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  background: var(--blanco);
+  cursor: pointer;
+  font-size: 14.5px;
+  color: var(--carbon);
+}
+
+.opcion-servicio:hover { border-color: var(--carbon); }
+
+.opcion-servicio.activa {
+  border-color: var(--carbon);
+  background: var(--beige);
+}
+
+.opcion-servicio[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.opcion-servicio .precio { font-weight: 700; }
+
+.form-confirmar { margin-top: 14px; }
+
+.form-confirmar label {
+  display: block;
+  font-size: 13px;
+  color: var(--carbon-suave);
+  margin: 10px 0 4px;
+}
+
+.form-confirmar input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.boton-primario {
+  width: 100%;
+  padding: 13px;
+  margin-top: 16px;
+  background: var(--carbon);
+  color: var(--blanco);
+  border: none;
+  border-radius: var(--radio);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.boton-primario:hover { opacity: 0.9; }
+.boton-primario[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.boton-secundario {
+  width: 100%;
+  padding: 11px;
+  background: none;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--carbon);
+}
+
+.mensaje-error {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #F5E7E3;
+  border: 1px solid var(--rojo-aviso);
+  border-radius: var(--radio);
+  color: var(--rojo-aviso);
+  font-size: 13.5px;
+}
+
+/* ---------------------------------------------------------------------
+   Confirmación
+   --------------------------------------------------------------------- */
+.pantalla-confirmacion {
+  text-align: center;
+  padding: 30px 10px 10px;
+}
+
+.pantalla-confirmacion img { width: 72px; margin-bottom: 10px; }
+
+.recibo {
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  background: var(--blanco);
+  text-align: left;
+}
+
+.recibo dt { font-size: 12px; color: var(--carbon-suave); margin-top: 10px; }
+.recibo dt:first-child { margin-top: 0; }
+.recibo dd { margin: 2px 0 0; font-size: 16px; }
+
+.boton-whatsapp {
+  width: 100%;
+  padding: 13px;
+  background: var(--verde-whatsapp);
+  color: white;
+  border: none;
+  border-radius: var(--radio);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.boton-whatsapp:hover { opacity: 0.92; }
+
+/* ---------------------------------------------------------------------
+   Panel admin
+   --------------------------------------------------------------------- */
+.tabs-admin {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.tab-admin {
+  flex: 1;
+  padding: 11px;
+  text-align: center;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  background: var(--blanco);
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--carbon-suave);
+}
+
+.tab-admin.activa {
+  background: var(--carbon);
+  color: var(--blanco);
+  border-color: var(--carbon);
+}
+
+.tarjeta-turno {
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  background: var(--blanco);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.tarjeta-turno .fila-superior {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.tarjeta-turno .hora { font-weight: 700; font-size: 16px; }
+.tarjeta-turno .precio { font-weight: 700; }
+.tarjeta-turno .servicio { color: var(--carbon-suave); font-size: 14px; margin-top: 2px; }
+.tarjeta-turno .cliente { margin-top: 8px; font-size: 14px; }
+
+.tarjeta-turno .acciones {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.tarjeta-turno .acciones a,
+.tarjeta-turno .acciones button {
+  flex: 1;
+  padding: 8px;
+  font-size: 13px;
+  border-radius: var(--radio);
+  border: 1px solid var(--linea);
+  background: var(--beige-suave);
+  text-align: center;
+  text-decoration: none;
+  color: var(--carbon);
+  cursor: pointer;
+}
+
+.total-dia {
+  margin: 16px 0 4px;
+  padding: 12px 16px;
+  background: var(--beige);
+  border-radius: var(--radio);
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.vacio-admin {
+  text-align: center;
+  padding: 30px 10px;
+  color: var(--carbon-suave);
+}
+
+.acciones-bloqueo {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0 20px;
+}
+
+.acciones-bloqueo button {
+  flex: 1;
+  padding: 9px;
+  border-radius: var(--radio);
+  border: 1px solid var(--linea);
+  background: var(--blanco);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+@media (min-width: 640px) {
+  .contenedor { padding-top: 30px; }
+}

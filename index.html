@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Reservá tu turno para uñas online">
+<meta name="theme-color" content="#E8E0D4">
+<meta name="apple-mobile-web-app-title" content="Decor Nails">
+<link rel="icon" href="assets/iconos/favicon.png">
+<link rel="apple-touch-icon" href="assets/iconos/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<title>Decor Nails</title>
+</head>
+<body>
+
+<header class="encabezado">
+  <img class="marca-logo" src="assets/iconos/logo-mark.png" alt="Decor Nails">
+  <h1>Decor Nails</h1>
+  <p class="responsable">Magali Ampudia</p>
+</header>
+
+<main class="contenedor">
+
+  <!-- Vista de reserva -->
+  <section id="vista-reserva">
+    <div class="selector-fecha">
+      <button id="btn-dia-anterior" type="button" aria-label="Día anterior">‹</button>
+      <input type="date" id="input-fecha">
+      <button id="btn-dia-siguiente" type="button" aria-label="Día siguiente">›</button>
+    </div>
+
+    <h2 class="dia-titulo" id="dia-titulo"></h2>
+
+    <div id="dia-cerrado" class="dia-cerrado oculto">
+      Los domingos el salón no atiende. Elegí otro día.
+    </div>
+
+    <div id="lista-franjas" class="lista-franjas"></div>
+  </section>
+
+  <!-- Pantalla de confirmación -->
+  <section id="vista-confirmacion" class="pantalla-confirmacion oculto">
+    <img src="assets/iconos/logo-mark.png" alt="">
+    <h2>¡Turno confirmado!</h2>
+    <dl class="recibo" id="recibo-datos"></dl>
+    <a class="boton-whatsapp" id="btn-whatsapp" target="_blank" rel="noopener">
+      Confirmar por WhatsApp
+    </a>
+    <button class="boton-secundario" id="btn-volver" type="button" style="margin-top:10px;">
+      Ver la agenda del día
+    </button>
+  </section>
+
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/marca.js"></script>
+<script src="js/publico.js"></script>
+</body>
+</html>
