@@ -21,14 +21,19 @@ const db = firebase.firestore();
 const DIAS_SEMANA = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
-const elInputFecha = document.getElementById('input-fecha');
+const elMesTitulo = document.getElementById('mes-titulo');
+const elGrillaEncabezado = document.getElementById('grilla-encabezado');
+const elGrillaCalendario = document.getElementById('grilla-calendario');
+const elVistaCalendario = document.getElementById('vista-calendario');
 const elDiaTitulo = document.getElementById('dia-titulo');
-const elDiaCerrado = document.getElementById('dia-cerrado');
 const elListaFranjas = document.getElementById('lista-franjas');
 const elVistaReserva = document.getElementById('vista-reserva');
 const elVistaConfirmacion = document.getElementById('vista-confirmacion');
 
-let fechaActual = new Date();
+const NOMBRES_DIAS_CORTOS = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do'];
+
+let fechaActual = null;      // día elegido (detalle)
+let mesEnPantalla = new Date(); // mes que se está mostrando en el calendario
 let panelAbiertoHora = null; // qué franja tiene el panel de servicio desplegado
 
 function formatoFecha(d) {
@@ -38,9 +43,8 @@ function formatoFecha(d) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-function fechaDesdeInput(str) {
-  const [y, m, d] = str.split('-').map(Number);
-  return new Date(y, m - 1, d);
+function fechaLegible(d) {
+  return `${DIAS_SEMANA[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`;
 }
 
 function horasDelDia() {
@@ -53,36 +57,105 @@ function idFranja(fechaStr, hora) {
   return `${fechaStr}_${hora}`;
 }
 
-// ------------------------------------------------------------------
-// Ir a una fecha nueva
-// ------------------------------------------------------------------
-function irAFecha(d) {
-  fechaActual = d;
-  panelAbiertoHora = null;
-  elInputFecha.value = formatoFecha(d);
-  renderizarDia();
+function mostrarVista(nombre) {
+  elVistaCalendario.classList.toggle('oculto', nombre !== 'calendario');
+  elVistaReserva.classList.toggle('oculto', nombre !== 'reserva');
+  elVistaConfirmacion.classList.toggle('oculto', nombre !== 'confirmacion');
 }
 
-document.getElementById('btn-dia-anterior').addEventListener('click', () => {
-  const d = new Date(fechaActual);
-  d.setDate(d.getDate() - 1);
-  irAFecha(d);
-});
+// ------------------------------------------------------------------
+// Calendario mensual
+// ------------------------------------------------------------------
+function hoySinHora() {
+  const h = new Date();
+  h.setHours(0, 0, 0, 0);
+  return h;
+}
 
-document.getElementById('btn-dia-siguiente').addEventListener('click', () => {
-  const d = new Date(fechaActual);
-  d.setDate(d.getDate() + 1);
-  irAFecha(d);
-});
+function renderizarCalendario() {
+  elMesTitulo.textContent = `${MESES[mesEnPantalla.getMonth()]} ${mesEnPantalla.getFullYear()}`;
 
-elInputFecha.addEventListener('change', () => {
-  if (!elInputFecha.value) return;
-  irAFecha(fechaDesdeInput(elInputFecha.value));
+  const btnAnterior = document.getElementById('btn-mes-anterior');
+  btnAnterior.disabled = mesEsElActual(mesEnPantalla);
+
+  if (!elGrillaEncabezado.childElementCount) {
+    NOMBRES_DIAS_CORTOS.forEach(n => {
+      const s = document.createElement('span');
+      s.textContent = n;
+      elGrillaEncabezado.appendChild(s);
+    });
+  }
+
+  elGrillaCalendario.innerHTML = '';
+  const year = mesEnPantalla.getFullYear();
+  const month = mesEnPantalla.getMonth();
+  const primerDia = new Date(year, month, 1);
+  const offsetInicial = (primerDia.getDay() + 6) % 7; // semana empieza lunes
+  const diasEnMes = new Date(year, month + 1, 0).getDate();
+  const hoy = hoySinHora();
+
+  const totalCeldas = offsetInicial + diasEnMes;
+  const relleno = (7 - (totalCeldas % 7)) % 7;
+
+  for (let i = 0; i < offsetInicial; i++) {
+    elGrillaCalendario.appendChild(crearCeldaVacia());
+  }
+  for (let dia = 1; dia <= diasEnMes; dia++) {
+    const fecha = new Date(year, month, dia);
+    const esDomingo = fecha.getDay() === 0;
+    const esPasado = fecha < hoy;
+    const deshabilitada = esDomingo || esPasado;
+    const esHoy = fecha.getTime() === hoy.getTime();
+
+    const celda = document.createElement('button');
+    celda.type = 'button';
+    celda.className = 'celda-dia' + (deshabilitada ? ' deshabilitada' : '') + (esHoy ? ' hoy' : '');
+    celda.textContent = String(dia);
+    celda.disabled = deshabilitada;
+    if (!deshabilitada) {
+      celda.addEventListener('click', () => mostrarDetalleDia(fecha));
+    }
+    elGrillaCalendario.appendChild(celda);
+  }
+  for (let i = 0; i < relleno; i++) {
+    elGrillaCalendario.appendChild(crearCeldaVacia());
+  }
+}
+
+function crearCeldaVacia() {
+  const div = document.createElement('div');
+  div.className = 'celda-dia vacia';
+  return div;
+}
+
+function mesEsElActual(fecha) {
+  const hoy = new Date();
+  return fecha.getFullYear() === hoy.getFullYear() && fecha.getMonth() === hoy.getMonth();
+}
+
+document.getElementById('btn-mes-anterior').addEventListener('click', () => {
+  mesEnPantalla = new Date(mesEnPantalla.getFullYear(), mesEnPantalla.getMonth() - 1, 1);
+  renderizarCalendario();
+});
+document.getElementById('btn-mes-siguiente').addEventListener('click', () => {
+  mesEnPantalla = new Date(mesEnPantalla.getFullYear(), mesEnPantalla.getMonth() + 1, 1);
+  renderizarCalendario();
+});
+document.getElementById('btn-volver-calendario').addEventListener('click', () => {
+  panelAbiertoHora = null;
+  mostrarVista('calendario');
 });
 
 // ------------------------------------------------------------------
-// Traer el estado de las 5 franjas del día desde Firestore
+// Detalle de un día
 // ------------------------------------------------------------------
+async function mostrarDetalleDia(fecha) {
+  fechaActual = fecha;
+  panelAbiertoHora = null;
+  mostrarVista('reserva');
+  await renderizarDia();
+}
+
 async function traerEstadoDia(fechaStr) {
   const horas = horasDelDia();
   const snaps = await Promise.all(
@@ -95,22 +168,9 @@ async function traerEstadoDia(fechaStr) {
   return estado;
 }
 
-// ------------------------------------------------------------------
-// Render principal del día
-// ------------------------------------------------------------------
 async function renderizarDia() {
   const fechaStr = formatoFecha(fechaActual);
-  const diaSemana = fechaActual.getDay();
-
-  elDiaTitulo.textContent = `${DIAS_SEMANA[diaSemana]} ${fechaActual.getDate()} de ${MESES[fechaActual.getMonth()]}`;
-
-  if (!HORARIO.diasHabiles.includes(diaSemana)) {
-    elDiaCerrado.classList.remove('oculto');
-    elListaFranjas.classList.add('oculto');
-    return;
-  }
-  elDiaCerrado.classList.add('oculto');
-  elListaFranjas.classList.remove('oculto');
+  elDiaTitulo.textContent = fechaLegible(fechaActual);
   elListaFranjas.innerHTML = '<p style="color:var(--carbon-suave);font-size:14px;">Cargando horarios…</p>';
 
   const estadoDia = await traerEstadoDia(fechaStr);
@@ -286,16 +346,20 @@ async function reservarTurno(fechaStr, horaInicio, servicio, clienteNombre, clie
 // ------------------------------------------------------------------
 // Pantalla de confirmación + link de WhatsApp
 // ------------------------------------------------------------------
-function mostrarConfirmacion(fechaStr, horaInicio, servicio, nombre, whatsapp) {
-  elVistaReserva.classList.add('oculto');
-  elVistaConfirmacion.classList.remove('oculto');
+function fechaDesdeStr(str) {
+  const [y, m, d] = str.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
 
-  const fecha = fechaDesdeInput(fechaStr);
-  const fechaLegible = `${DIAS_SEMANA[fecha.getDay()]} ${fecha.getDate()} de ${MESES[fecha.getMonth()]}`;
+function mostrarConfirmacion(fechaStr, horaInicio, servicio, nombre, whatsapp) {
+  mostrarVista('confirmacion');
+
+  const fecha = fechaDesdeStr(fechaStr);
+  const fechaTexto = fechaLegible(fecha);
   const horaTexto = `${String(horaInicio).padStart(2,'0')}:00hs`;
 
   document.getElementById('recibo-datos').innerHTML = `
-    <dt>Día</dt><dd>${fechaLegible}</dd>
+    <dt>Día</dt><dd>${fechaTexto}</dd>
     <dt>Hora</dt><dd>${horaTexto}</dd>
     <dt>Servicio</dt><dd>${servicio.nombre}</dd>
     <dt>Precio</dt><dd>$${servicio.precio.toLocaleString('es-AR')}</dd>
@@ -303,7 +367,7 @@ function mostrarConfirmacion(fechaStr, horaInicio, servicio, nombre, whatsapp) {
 
   const btnWhatsapp = document.getElementById('btn-whatsapp');
   if (MARCA.whatsappSalon && !MARCA.whatsappSalon.startsWith('COMPLETAR')) {
-    const mensaje = `Hola! Quiero confirmar mi turno en Decor Nails: ${fechaLegible} a las ${horaTexto} — ${servicio.nombre} ($${servicio.precio.toLocaleString('es-AR')}). Mi nombre: ${nombre}.`;
+    const mensaje = `Hola! Quiero confirmar mi turno en Decor Nails: ${fechaTexto} a las ${horaTexto} — ${servicio.nombre} ($${servicio.precio.toLocaleString('es-AR')}). Mi nombre: ${nombre}.`;
     btnWhatsapp.href = `https://wa.me/${MARCA.whatsappSalon}?text=${encodeURIComponent(mensaje)}`;
     btnWhatsapp.classList.remove('oculto');
   } else {
@@ -312,14 +376,13 @@ function mostrarConfirmacion(fechaStr, horaInicio, servicio, nombre, whatsapp) {
 }
 
 document.getElementById('btn-volver').addEventListener('click', () => {
-  elVistaConfirmacion.classList.add('oculto');
-  elVistaReserva.classList.remove('oculto');
   panelAbiertoHora = null;
+  mostrarVista('reserva');
   renderizarDia();
 });
 
 // ------------------------------------------------------------------
 // Arranque
 // ------------------------------------------------------------------
-elInputFecha.min = formatoFecha(new Date());
-irAFecha(new Date());
+mostrarVista('calendario');
+renderizarCalendario();

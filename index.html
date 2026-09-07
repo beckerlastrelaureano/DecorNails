@@ -25,20 +25,21 @@
 
 <main class="contenedor">
 
-  <!-- Vista de reserva -->
-  <section id="vista-reserva">
-    <div class="selector-fecha">
-      <button id="btn-dia-anterior" type="button" aria-label="Día anterior">‹</button>
-      <input type="date" id="input-fecha">
-      <button id="btn-dia-siguiente" type="button" aria-label="Día siguiente">›</button>
+  <!-- Calendario -->
+  <section id="vista-calendario">
+    <div class="nav-mes">
+      <button id="btn-mes-anterior" type="button" aria-label="Mes anterior">‹</button>
+      <h2 id="mes-titulo"></h2>
+      <button id="btn-mes-siguiente" type="button" aria-label="Mes siguiente">›</button>
     </div>
+    <div class="grilla-encabezado" id="grilla-encabezado"></div>
+    <div class="grilla-calendario" id="grilla-calendario"></div>
+  </section>
 
+  <!-- Detalle de un día -->
+  <section id="vista-reserva" class="oculto">
+    <button class="boton-volver" id="btn-volver-calendario" type="button">‹ Volver al calendario</button>
     <h2 class="dia-titulo" id="dia-titulo"></h2>
-
-    <div id="dia-cerrado" class="dia-cerrado oculto">
-      Los domingos el salón no atiende. Elegí otro día.
-    </div>
-
     <div id="lista-franjas" class="lista-franjas"></div>
   </section>
 
