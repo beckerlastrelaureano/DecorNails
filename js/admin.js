@@ -251,13 +251,15 @@ async function desbloquearDia(fechaStr) {
 
 async function cancelarTurno(fechaStr, turnoId) {
   if (!confirm('¿Cancelar este turno?')) return;
-  const turno = await traerTurno(turnoId);
-  if (!turno) return;
+  // Buscamos TODAS las franjas que apunten a este turno (por si ocupaba
+  // más de una hora) y las borramos junto con el turno. Hacerlo así, en
+  // vez de mirar turno.franjas, funciona incluso si el turno ya no existe
+  // (por ejemplo, si se borró a mano desde la consola de Firebase sin
+  // borrar también sus franjas).
+  const franjasSnap = await db.collection('franjasDecorNails').where('turnoId', '==', turnoId).get();
   const batch = db.batch();
+  franjasSnap.forEach(doc => batch.delete(doc.ref));
   batch.delete(db.collection('turnosDecorNails').doc(turnoId));
-  for (let i = 0; i < turno.franjas; i++) {
-    batch.delete(db.collection('franjasDecorNails').doc(idFranja(fechaStr, turno.horaInicio + i)));
-  }
   await batch.commit();
   renderizarAgenda();
 }
@@ -311,6 +313,38 @@ async function renderizarHoy() {
 }
 
 // ------------------------------------------------------------------
-// Arranque
+// Portón de acceso (DNI)
 // ------------------------------------------------------------------
-irAFecha(new Date());
+const CLAVE_SESION = 'decorNailsAdminOk';
+const elVistaAcceso = document.getElementById('vista-acceso');
+const elPanelAdmin = document.getElementById('panel-admin');
+
+function intentarEntrar() {
+  const valor = document.getElementById('input-dni').value.trim();
+  const elError = document.getElementById('error-acceso');
+  if (valor === MARCA.dniAdmin) {
+    sessionStorage.setItem(CLAVE_SESION, '1');
+    elVistaAcceso.classList.add('oculto');
+    elPanelAdmin.classList.remove('oculto');
+    irAFecha(new Date());
+  } else {
+    elError.classList.remove('oculto');
+    document.getElementById('input-dni').value = '';
+  }
+}
+
+document.getElementById('btn-entrar').addEventListener('click', intentarEntrar);
+document.getElementById('input-dni').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') intentarEntrar();
+});
+document.getElementById('btn-salir').addEventListener('click', () => {
+  sessionStorage.removeItem(CLAVE_SESION);
+  elPanelAdmin.classList.add('oculto');
+  elVistaAcceso.classList.remove('oculto');
+});
+
+if (sessionStorage.getItem(CLAVE_SESION) === '1') {
+  elVistaAcceso.classList.add('oculto');
+  elPanelAdmin.classList.remove('oculto');
+  irAFecha(new Date());
+}

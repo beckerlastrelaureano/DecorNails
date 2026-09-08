@@ -90,6 +90,78 @@ a { color: var(--carbon); }
 }
 
 /* ---------------------------------------------------------------------
+   Landing / página principal
+   --------------------------------------------------------------------- */
+.pantalla-inicio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 50px;
+}
+
+.frase-inicio {
+  font-size: 17px;
+  color: var(--carbon-suave);
+  max-width: 320px;
+  margin-bottom: 30px;
+}
+
+.boton-pedir-turno {
+  display: block;
+  text-decoration: none;
+  text-align: center;
+  max-width: 280px;
+  font-size: 17px;
+  padding: 16px;
+}
+
+.link-admin {
+  display: inline-block;
+  margin-top: 40px;
+  font-size: 13px;
+  color: var(--carbon-suave);
+  text-decoration: underline;
+}
+
+.link-admin:hover { color: var(--carbon); }
+
+/* ---------------------------------------------------------------------
+   Pantalla de acceso (DNI) del panel admin
+   --------------------------------------------------------------------- */
+.pantalla-acceso {
+  max-width: 320px;
+  margin: 40px auto 0;
+  text-align: center;
+}
+
+.pantalla-acceso p {
+  font-size: 14px;
+  color: var(--carbon-suave);
+  margin-bottom: 16px;
+}
+
+.pantalla-acceso input {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  font-family: inherit;
+  font-size: 20px;
+  letter-spacing: 4px;
+  text-align: center;
+}
+
+.enlace-salir {
+  display: block;
+  text-align: right;
+  font-size: 12px;
+  color: var(--carbon-suave);
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------------------------
    Calendario mensual
    --------------------------------------------------------------------- */
 .nav-mes {

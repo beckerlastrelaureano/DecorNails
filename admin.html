@@ -21,6 +21,16 @@
 
 <main class="contenedor">
 
+  <!-- Portón de acceso -->
+  <section id="vista-acceso" class="pantalla-acceso">
+    <p>Ingresá tu DNI para entrar al panel</p>
+    <input type="text" id="input-dni" inputmode="numeric" maxlength="8" placeholder="00000000">
+    <button class="boton-primario" id="btn-entrar" type="button" style="margin-top:14px;">Entrar</button>
+    <p class="mensaje-error oculto" id="error-acceso" style="margin-top:12px;">DNI incorrecto.</p>
+  </section>
+
+  <div id="panel-admin" class="oculto">
+  <a class="enlace-salir" id="btn-salir">Salir ↦</a>
   <div class="tabs-admin">
     <button class="tab-admin activa" id="tab-agenda" type="button">Agenda</button>
     <button class="tab-admin" id="tab-hoy" type="button">Turnos de hoy</button>
@@ -51,6 +61,8 @@
     <div id="lista-hoy"></div>
     <div class="total-dia oculto" id="total-hoy"></div>
   </section>
+
+  </div>
 
 </main>
 

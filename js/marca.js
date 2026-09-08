@@ -21,6 +21,14 @@ const MARCA = {
   // Número de WhatsApp del salón, formato internacional sin "+" ni espacios
   // (Argentina: 549 + código de área sin 0 + número sin 15).
   whatsappSalon: '5492302368174',
+
+  // DNI de 8 dígitos que pide el panel para dejar entrar a Magali.
+  // OJO — esto NO es una contraseña segura de verdad: cualquiera que abra
+  // "Ver código fuente" en el navegador puede leer este número acá mismo,
+  // en este archivo, que es público como cualquier otro archivo del sitio.
+  // Sirve para que una clienta cualquiera no entre por curiosidad, pero no
+  // frena a alguien que sepa buscarlo. Completalo vos con el DNI real.
+  dniAdmin: 'COMPLETAR-DNI-ADMIN',
 };
 
 // ------------------------------------------------------------------

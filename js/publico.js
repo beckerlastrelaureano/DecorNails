@@ -353,13 +353,11 @@ async function reservarTurno(fechaStr, horaInicio, servicio, clienteNombre, clie
 // ------------------------------------------------------------------
 async function cancelarTurnoPorId(turnoId) {
   const snap = await db.collection('turnosDecorNails').doc(turnoId).get();
-  if (!snap.exists) return null;
-  const turno = snap.data();
+  const turno = snap.exists ? snap.data() : null;
+  const franjasSnap = await db.collection('franjasDecorNails').where('turnoId', '==', turnoId).get();
   const batch = db.batch();
+  franjasSnap.forEach(doc => batch.delete(doc.ref));
   batch.delete(db.collection('turnosDecorNails').doc(turnoId));
-  for (let i = 0; i < turno.franjas; i++) {
-    batch.delete(db.collection('franjasDecorNails').doc(idFranja(turno.fecha, turno.horaInicio + i)));
-  }
   await batch.commit();
   return turno;
 }
