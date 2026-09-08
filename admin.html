@@ -24,7 +24,7 @@
   <!-- Portón de acceso -->
   <section id="vista-acceso" class="pantalla-acceso">
     <p>Ingresá tu DNI para entrar al panel</p>
-    <input type="text" id="input-dni" inputmode="numeric" maxlength="8" placeholder="00000000">
+    <input type="text" id="input-dni" inputmode="numeric" maxlength="11" placeholder="00.000.000">
     <button class="boton-primario" id="btn-entrar" type="button" style="margin-top:14px;">Entrar</button>
     <p class="mensaje-error oculto" id="error-acceso" style="margin-top:12px;">DNI incorrecto.</p>
   </section>
@@ -34,6 +34,7 @@
   <div class="tabs-admin">
     <button class="tab-admin activa" id="tab-agenda" type="button">Agenda</button>
     <button class="tab-admin" id="tab-hoy" type="button">Turnos de hoy</button>
+    <button class="tab-admin" id="tab-pagos" type="button">Pagos</button>
   </div>
 
   <!-- AGENDA -->
@@ -60,6 +61,18 @@
     <h2 class="dia-titulo" id="hoy-titulo"></h2>
     <div id="lista-hoy"></div>
     <div class="total-dia oculto" id="total-hoy"></div>
+  </section>
+
+  <!-- PAGOS -->
+  <section id="vista-pagos" class="oculto">
+    <div class="selector-fecha">
+      <button id="btn-pagos-dia-anterior" type="button" aria-label="Día anterior">‹</button>
+      <input type="date" id="input-fecha-pagos">
+      <button id="btn-pagos-dia-siguiente" type="button" aria-label="Día siguiente">›</button>
+    </div>
+    <h2 class="dia-titulo" id="pagos-titulo"></h2>
+    <div id="lista-pagos"></div>
+    <div id="resumen-pagos"></div>
   </section>
 
   </div>

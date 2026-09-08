@@ -49,22 +49,23 @@ function normalizarWhatsappAR(numeroCrudo) {
 // ------------------------------------------------------------------
 const elTabAgenda = document.getElementById('tab-agenda');
 const elTabHoy = document.getElementById('tab-hoy');
+const elTabPagos = document.getElementById('tab-pagos');
 const elVistaAgenda = document.getElementById('vista-agenda');
 const elVistaHoy = document.getElementById('vista-hoy');
+const elVistaPagos = document.getElementById('vista-pagos');
 
-elTabAgenda.addEventListener('click', () => {
-  elTabAgenda.classList.add('activa');
-  elTabHoy.classList.remove('activa');
-  elVistaAgenda.classList.remove('oculto');
-  elVistaHoy.classList.add('oculto');
-});
-elTabHoy.addEventListener('click', () => {
-  elTabHoy.classList.add('activa');
-  elTabAgenda.classList.remove('activa');
-  elVistaHoy.classList.remove('oculto');
-  elVistaAgenda.classList.add('oculto');
-  renderizarHoy();
-});
+function mostrarTab(nombre) {
+  elTabAgenda.classList.toggle('activa', nombre === 'agenda');
+  elTabHoy.classList.toggle('activa', nombre === 'hoy');
+  elTabPagos.classList.toggle('activa', nombre === 'pagos');
+  elVistaAgenda.classList.toggle('oculto', nombre !== 'agenda');
+  elVistaHoy.classList.toggle('oculto', nombre !== 'hoy');
+  elVistaPagos.classList.toggle('oculto', nombre !== 'pagos');
+}
+
+elTabAgenda.addEventListener('click', () => mostrarTab('agenda'));
+elTabHoy.addEventListener('click', () => { mostrarTab('hoy'); renderizarHoy(); });
+elTabPagos.addEventListener('click', () => { mostrarTab('pagos'); renderizarPagos(); });
 
 // ------------------------------------------------------------------
 // AGENDA
@@ -267,6 +268,28 @@ async function cancelarTurno(fechaStr, turnoId) {
 // ------------------------------------------------------------------
 // TURNOS DE HOY
 // ------------------------------------------------------------------
+async function marcarPago(turnoId, pagado) {
+  await db.collection('turnosDecorNails').doc(turnoId).update({ pagado });
+}
+
+function tarjetaTurnoHTML(t) {
+  return `
+    <div class="fila-superior">
+      <span class="hora">${String(t.horaInicio).padStart(2,'0')}:00</span>
+      <span class="precio">$${t.precio.toLocaleString('es-AR')}</span>
+    </div>
+    <div class="servicio">${t.servicio}</div>
+    <div class="cliente">${t.clienteNombre}</div>
+    <label class="check-cobrado">
+      <input type="checkbox" data-pagado="${t.id}" ${t.pagado ? 'checked' : ''}>
+      Cobrado
+    </label>
+    <div class="acciones">
+      <a href="https://wa.me/${normalizarWhatsappAR(t.clienteWhatsapp)}" target="_blank" rel="noopener">WhatsApp</a>
+      <button type="button" data-cancelar="${t.id}">Cancelar</button>
+    </div>`;
+}
+
 async function renderizarHoy() {
   const hoy = new Date();
   const fechaStr = formatoFecha(hoy);
@@ -293,23 +316,74 @@ async function renderizarHoy() {
     total += t.precio;
     const div = document.createElement('div');
     div.className = 'tarjeta-turno';
-    div.innerHTML = `
-      <div class="fila-superior">
-        <span class="hora">${String(t.horaInicio).padStart(2,'0')}:00</span>
-        <span class="precio">$${t.precio.toLocaleString('es-AR')}</span>
-      </div>
-      <div class="servicio">${t.servicio}</div>
-      <div class="cliente">${t.clienteNombre}</div>
-      <div class="acciones">
-        <a href="https://wa.me/${normalizarWhatsappAR(t.clienteWhatsapp)}" target="_blank" rel="noopener">WhatsApp</a>
-        <button type="button" data-cancelar="${t.id}">Cancelar</button>
-      </div>`;
+    div.innerHTML = tarjetaTurnoHTML(t);
     div.querySelector('button[data-cancelar]').addEventListener('click', () => cancelarTurno(fechaStr, t.id).then(renderizarHoy));
+    div.querySelector('input[data-pagado]').addEventListener('change', (e) => marcarPago(t.id, e.target.checked));
     elLista.appendChild(div);
   });
 
   elTotal.classList.remove('oculto');
   elTotal.innerHTML = `<span>Total del día</span><span>$${total.toLocaleString('es-AR')}</span>`;
+}
+
+// ------------------------------------------------------------------
+// PAGOS
+// ------------------------------------------------------------------
+let fechaPagos = new Date();
+
+function irAFechaPagos(d) {
+  fechaPagos = d;
+  document.getElementById('input-fecha-pagos').value = formatoFecha(d);
+  renderizarPagos();
+}
+
+document.getElementById('btn-pagos-dia-anterior').addEventListener('click', () => {
+  const d = new Date(fechaPagos); d.setDate(d.getDate() - 1); irAFechaPagos(d);
+});
+document.getElementById('btn-pagos-dia-siguiente').addEventListener('click', () => {
+  const d = new Date(fechaPagos); d.setDate(d.getDate() + 1); irAFechaPagos(d);
+});
+document.getElementById('input-fecha-pagos').addEventListener('change', (e) => {
+  if (e.target.value) irAFechaPagos(fechaDesdeInput(e.target.value));
+});
+
+async function renderizarPagos() {
+  const fechaStr = formatoFecha(fechaPagos);
+  document.getElementById('input-fecha-pagos').value = fechaStr;
+  document.getElementById('pagos-titulo').textContent =
+    `${DIAS_SEMANA[fechaPagos.getDay()]} ${fechaPagos.getDate()} de ${MESES[fechaPagos.getMonth()]}`;
+
+  const elLista = document.getElementById('lista-pagos');
+  const elResumen = document.getElementById('resumen-pagos');
+  elLista.innerHTML = '<p style="color:var(--carbon-suave);font-size:14px;">Cargando…</p>';
+  elResumen.innerHTML = '';
+
+  const snap = await db.collection('turnosDecorNails').where('fecha', '==', fechaStr).get();
+  const turnos = [];
+  snap.forEach(doc => turnos.push({ id: doc.id, ...doc.data() }));
+  turnos.sort((a, b) => a.horaInicio - b.horaInicio);
+
+  if (turnos.length === 0) {
+    elLista.innerHTML = '<div class="vacio-admin">No hay turnos ese día.</div>';
+    return;
+  }
+
+  elLista.innerHTML = '';
+  let cobrado = 0, pendiente = 0;
+  turnos.forEach(t => {
+    if (t.pagado) cobrado += t.precio; else pendiente += t.precio;
+    const div = document.createElement('div');
+    div.className = 'tarjeta-turno';
+    div.innerHTML = tarjetaTurnoHTML(t);
+    div.querySelector('button[data-cancelar]').addEventListener('click', () => cancelarTurno(fechaStr, t.id).then(renderizarPagos));
+    div.querySelector('input[data-pagado]').addEventListener('change', (e) => marcarPago(t.id, e.target.checked).then(renderizarPagos));
+    elLista.appendChild(div);
+  });
+
+  elResumen.innerHTML = `
+    <div class="total-dia"><span>Cobrado</span><span>$${cobrado.toLocaleString('es-AR')}</span></div>
+    <div class="total-dia" style="background:var(--beige-suave);"><span>Pendiente</span><span>$${pendiente.toLocaleString('es-AR')}</span></div>
+  `;
 }
 
 // ------------------------------------------------------------------
@@ -319,10 +393,12 @@ const CLAVE_SESION = 'decorNailsAdminOk';
 const elVistaAcceso = document.getElementById('vista-acceso');
 const elPanelAdmin = document.getElementById('panel-admin');
 
+function soloDigitos(s) { return (s || '').replace(/\D/g, ''); }
+
 function intentarEntrar() {
-  const valor = document.getElementById('input-dni').value.trim();
+  const valor = document.getElementById('input-dni').value;
   const elError = document.getElementById('error-acceso');
-  if (valor === MARCA.dniAdmin) {
+  if (soloDigitos(valor) === soloDigitos(MARCA.dniAdmin)) {
     sessionStorage.setItem(CLAVE_SESION, '1');
     elVistaAcceso.classList.add('oculto');
     elPanelAdmin.classList.remove('oculto');

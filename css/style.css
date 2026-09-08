@@ -542,6 +542,18 @@ a { color: var(--carbon); }
 .tarjeta-turno .servicio { color: var(--carbon-suave); font-size: 14px; margin-top: 2px; }
 .tarjeta-turno .cliente { margin-top: 8px; font-size: 14px; }
 
+.check-cobrado {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 13.5px;
+  color: var(--carbon-suave);
+  cursor: pointer;
+}
+
+.check-cobrado input { width: 16px; height: 16px; cursor: pointer; }
+
 .tarjeta-turno .acciones {
   margin-top: 10px;
   display: flex;

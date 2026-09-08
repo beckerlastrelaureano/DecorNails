@@ -27,8 +27,8 @@ const MARCA = {
   // "Ver código fuente" en el navegador puede leer este número acá mismo,
   // en este archivo, que es público como cualquier otro archivo del sitio.
   // Sirve para que una clienta cualquiera no entre por curiosidad, pero no
-  // frena a alguien que sepa buscarlo. Completalo vos con el DNI real.
-  dniAdmin: 'COMPLETAR-DNI-ADMIN',
+  // frena a alguien que sepa buscarlo.
+  dniAdmin: '47198691',
 };
 
 // ------------------------------------------------------------------

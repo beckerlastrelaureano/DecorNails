@@ -334,6 +334,7 @@ async function reservarTurno(fechaStr, horaInicio, servicio, clienteNombre, clie
       precio: servicio.precio,
       clienteNombre,
       clienteWhatsapp,
+      pagado: false,
       creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
     });
     franjaRefs.forEach((ref, idx) => {
