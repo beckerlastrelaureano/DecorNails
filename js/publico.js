@@ -57,10 +57,13 @@ function idFranja(fechaStr, hora) {
   return `${fechaStr}_${hora}`;
 }
 
+const elVistaCancelar = document.getElementById('vista-cancelar');
+
 function mostrarVista(nombre) {
   elVistaCalendario.classList.toggle('oculto', nombre !== 'calendario');
   elVistaReserva.classList.toggle('oculto', nombre !== 'reserva');
   elVistaConfirmacion.classList.toggle('oculto', nombre !== 'confirmacion');
+  elVistaCancelar.classList.toggle('oculto', nombre !== 'cancelar');
 }
 
 // ------------------------------------------------------------------
@@ -258,7 +261,7 @@ function armarPanelServicio(fechaStr, horaInicio, estadoDia) {
   formulario.innerHTML = `
     <label for="campo-nombre-${horaInicio}">Tu nombre</label>
     <input type="text" id="campo-nombre-${horaInicio}" placeholder="Nombre y apellido">
-    <label for="campo-whatsapp-${horaInicio}">Tu WhatsApp</label>
+    <label for="campo-whatsapp-${horaInicio}">Tu WhatsApp (para que Magali te pueda escribir)</label>
     <input type="tel" id="campo-whatsapp-${horaInicio}" placeholder="Ej: 2954123456">
     <button type="button" class="boton-primario" id="btn-confirmar-${horaInicio}">Confirmar turno</button>
     <div class="mensaje-error oculto" id="error-${horaInicio}"></div>
@@ -280,8 +283,8 @@ function armarPanelServicio(fechaStr, horaInicio, estadoDia) {
     btnConfirmar.textContent = 'Reservando…';
 
     try {
-      await reservarTurno(fechaStr, horaInicio, servicioElegido, nombre, whatsapp);
-      mostrarConfirmacion(fechaStr, horaInicio, servicioElegido, nombre, whatsapp);
+      const turnoId = await reservarTurno(fechaStr, horaInicio, servicioElegido, nombre, whatsapp);
+      mostrarConfirmacion(fechaStr, horaInicio, servicioElegido, nombre, whatsapp, turnoId);
     } catch (e) {
       btnConfirmar.disabled = false;
       btnConfirmar.textContent = 'Confirmar turno';
@@ -341,6 +344,24 @@ async function reservarTurno(fechaStr, horaInicio, servicio, clienteNombre, clie
       });
     });
   });
+  return turnoRef.id;
+}
+
+// ------------------------------------------------------------------
+// Cancelar un turno a partir de su id (usado por el link secreto de
+// cancelación y, del lado del panel, por admin.js con la misma idea)
+// ------------------------------------------------------------------
+async function cancelarTurnoPorId(turnoId) {
+  const snap = await db.collection('turnosDecorNails').doc(turnoId).get();
+  if (!snap.exists) return null;
+  const turno = snap.data();
+  const batch = db.batch();
+  batch.delete(db.collection('turnosDecorNails').doc(turnoId));
+  for (let i = 0; i < turno.franjas; i++) {
+    batch.delete(db.collection('franjasDecorNails').doc(idFranja(turno.fecha, turno.horaInicio + i)));
+  }
+  await batch.commit();
+  return turno;
 }
 
 // ------------------------------------------------------------------
@@ -351,7 +372,7 @@ function fechaDesdeStr(str) {
   return new Date(y, m - 1, d);
 }
 
-function mostrarConfirmacion(fechaStr, horaInicio, servicio, nombre, whatsapp) {
+function mostrarConfirmacion(fechaStr, horaInicio, servicio, nombre, whatsapp, turnoId) {
   mostrarVista('confirmacion');
 
   const fecha = fechaDesdeStr(fechaStr);
@@ -373,6 +394,17 @@ function mostrarConfirmacion(fechaStr, horaInicio, servicio, nombre, whatsapp) {
   } else {
     btnWhatsapp.classList.add('oculto');
   }
+
+  const linkCancelar = `${location.origin}${location.pathname}?cancelar=${turnoId}`;
+  const inputLink = document.getElementById('input-link-cancelar');
+  inputLink.value = linkCancelar;
+  document.getElementById('btn-copiar-link').onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(linkCancelar);
+    } catch (e) {
+      inputLink.select();
+    }
+  };
 }
 
 document.getElementById('btn-volver').addEventListener('click', () => {
@@ -382,7 +414,50 @@ document.getElementById('btn-volver').addEventListener('click', () => {
 });
 
 // ------------------------------------------------------------------
+// Cancelar turno (se llega acá con index.html?cancelar=ID)
+// ------------------------------------------------------------------
+async function mostrarPantallaCancelar(turnoId) {
+  mostrarVista('cancelar');
+  const elTitulo = document.getElementById('cancelar-titulo');
+  const elDatos = document.getElementById('cancelar-datos');
+  const btnConfirmar = document.getElementById('btn-confirmar-cancelacion');
+
+  const snap = await db.collection('turnosDecorNails').doc(turnoId).get();
+  if (!snap.exists) {
+    elTitulo.textContent = 'Este turno ya no existe';
+    elDatos.classList.add('oculto');
+    btnConfirmar.classList.add('oculto');
+    return;
+  }
+  const turno = snap.data();
+  const fechaTexto = fechaLegible(fechaDesdeStr(turno.fecha));
+  const horaTexto = `${String(turno.horaInicio).padStart(2,'0')}:00hs`;
+
+  elTitulo.textContent = '¿Cancelar este turno?';
+  elDatos.classList.remove('oculto');
+  elDatos.innerHTML = `
+    <dt>Día</dt><dd>${fechaTexto}</dd>
+    <dt>Hora</dt><dd>${horaTexto}</dd>
+    <dt>Servicio</dt><dd>${turno.servicio}</dd>
+  `;
+  btnConfirmar.classList.remove('oculto');
+  btnConfirmar.onclick = async () => {
+    btnConfirmar.disabled = true;
+    btnConfirmar.textContent = 'Cancelando…';
+    await cancelarTurnoPorId(turnoId);
+    elTitulo.textContent = 'Listo, tu turno fue cancelado';
+    elDatos.classList.add('oculto');
+    btnConfirmar.classList.add('oculto');
+  };
+}
+
+// ------------------------------------------------------------------
 // Arranque
 // ------------------------------------------------------------------
-mostrarVista('calendario');
-renderizarCalendario();
+const idACancelar = new URLSearchParams(location.search).get('cancelar');
+if (idACancelar) {
+  mostrarPantallaCancelar(idACancelar);
+} else {
+  mostrarVista('calendario');
+  renderizarCalendario();
+}
